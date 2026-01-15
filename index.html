@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Segurança JW - Registro Dinâmico</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --accent: #ff6600;
+            --glow: rgba(46, 125, 50, 0.3);
+            --bg-soft: #f0f2f5;
+            --card-inner: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-soft);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 750px;
+            background: var(--card-inner);
+            border-radius: 40px;
+            padding: 45px;
+            border: 6px solid var(--primary);
+            box-shadow: 0 25px 50px var(--glow);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header { display: flex; align-items: center; margin-bottom: 40px; gap: 20px; }
+        .logo { font-size: 52px; font-weight: 900; color: #000; letter-spacing: -3px; }
+        .logo span { color: var(--accent); }
+        .main-title {
+            background: var(--primary);
+            color: white;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 22px;
+            font-weight: 800;
+            text-transform: uppercase;
+            flex-grow: 1;
+            text-align: center;
+            transition: 0.5s;
+        }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .input-group { margin-bottom: 22px; }
+        label { display: block; font-size: 11px; font-weight: 800; color: #333; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        input, select, textarea {
+            width: 100%; padding: 16px; border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 15px; background: rgba(255,255,255,0.5);
+            font-size: 15px; transition: 0.3s; outline: none; box-sizing: border-box;
+        }
+
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--primary); 
+            background: #fff;
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        .btn-submit {
+            width: 100%; padding: 22px; background: var(--primary); color: white;
+            border: none; border-radius: 18px; font-size: 20px; font-weight: 900;
+            text-transform: uppercase; cursor: pointer; transition: 0.4s;
+            box-shadow: 0 10px 20px var(--glow);
+        }
+
+        /* Classes Dinâmicas que mudam o fundo do card também */
+        .card.baixa { --primary: #2e7d32; --glow: rgba(46, 125, 50, 0.3); --bg-soft: #e8f5e9; --card-inner: #f1f8e9; }
+        .card.media { --primary: #ffa000; --glow: rgba(255, 160, 0, 0.3); --bg-soft: #fff3e0; --card-inner: #fffde7; }
+        .card.alta { --primary: #d32f2f; --glow: rgba(211, 47, 47, 0.3); --bg-soft: #ffebee; --card-inner: #fff5f5; }
+
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } .header { flex-direction: column; text-align: center; } }
+    </style>
+</head>
+<body id="pageBody">
+
+<div class="card" id="formCard">
+    <div class="header">
+        <div class="logo">N<span>.</span></div>
+        <div class="main-title">Alerta de Segurança</div>
+    </div>
+
+    <form id="safetyForm">
+        <div class="grid">
+            <div class="input-group">
+                <label>📅 Data da Ocorrência *</label>
+                <input type="date" id="data" required>
+            </div>
+            <div class="input-group">
+                <label>⚠️ Gravidade / Tipo *</label>
+                <select id="gravidade" onchange="updateTheme()" required>
+                    <option value="" disabled selected>Selecione a Gravidade...</option>
+                    <option value="baixa">BAIXA (Informativo / Quase Acidente)</option>
+                    <option value="media">MÉDIA (Condição Insegura / Dano Material)</option>
+                    <option value="alta">ALTA (Acidente / Perigo Crítico)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="input-group">
+                <label>🏢 Área (Localização) *</label>
+                <select id="area" required>
+                    <option value="" disabled selected>Escolha o local...</option>
+                    <option value="Docas">Docas</option>
+                    <option value="Picking">Picking</option>
+                    <option value="Loja">Loja</option>
+                    <option value="Recuada">Recuada</option>
+                    <option value="Armazem A04">Armazem A04</option>
+                    <option value="Montagem">Montagem</option>
+                    <option value="Avaria">Avaria</option>
+                    <option value="Sala de Bateria">Sala de Bateria</option>
+                    <option value="Escritório 1">Escritório 1</option>
+                    <option value="Escritório 2 (operacional)">Escritório 2 (operacional)</option>
+                    <option value="Vestiário Masculino">Vestiário Masculino</option>
+                    <option value="Vestiario Feminino">Vestiario Feminino</option>
+                    <option value="Vestiário JW">Vestiário JW</option>
+                    <option value="Tráfego">Tráfego</option>
+                    <option value="Portaria 2">Portaria 2</option>
+                    <option value="PD">PD</option>
+                    <option value="Pátio">Pátio</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>📍 Detalhe do Local *</label>
+                <input type="text" id="local_especifico" placeholder="Ex: Rua 10, Box 05..." required>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>📝 Descrição da Ocorrência *</label>
+            <textarea id="descricao" rows="4" placeholder="Descreva detalhadamente..." required></textarea>
+        </div>
+
+        <div class="input-group">
+            <label>📸 Fotos Evidências *</label>
+            <div style="border: 3px dashed var(--primary); padding: 15px; border-radius: 15px; background: rgba(255,255,255,0.3);">
+                <input type="file" id="fotos" accept="image/*" multiple required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnEnviar">Enviar Alerta de Segurança</button>
+    </form>
+</div>
+
+<script>
+    (function(){ emailjs.init("L4H6eNAhaPOP7m2Ii"); })();
+    
+    let currentThemeColor = "#2e7d32";
+    let currentInnerColor = "#f1f8e9";
+
+    function updateTheme() {
+        const val = document.getElementById('gravidade').value;
+        const card = document.getElementById('formCard');
+        card.classList.remove('baixa', 'media', 'alta');
+        
+        if(val === 'baixa') { 
+            card.classList.add('baixa'); currentThemeColor = "#2e7d32"; currentInnerColor = "#f1f8e9";
+        } else if(val === 'media') { 
+            card.classList.add('media'); currentThemeColor = "#ffa000"; currentInnerColor = "#fffde7";
+        } else if(val === 'alta') { 
+            card.classList.add('alta'); currentThemeColor = "#d32f2f"; currentInnerColor = "#fff5f5";
+        }
+    }
+
+    document.getElementById('safetyForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnEnviar');
+        btn.disabled = true;
+        btn.innerText = "🚀 ENVIANDO...";
+
+        const files = document.getElementById('fotos').files;
+        let linksHtml = "";
+
+        for (let f of files) {
+            const fd = new FormData();
+            fd.append("file", f);
+            fd.append("upload_preset", "ml_default"); 
+            try {
+                const res = await fetch("https://api.cloudinary.com/v1_1/dhpvtxjjw/image/upload", { method: "POST", body: fd });
+                const d = await res.json();
+                if(d.secure_url) {
+                    linksHtml += `<div style="margin-bottom:10px;"><a href="${d.secure_url}" target="_blank" style="display:inline-block; padding:12px 20px; background-color: ${currentThemeColor}; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: bold;">📂 VER FOTO</a></div>`;
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        const templateParams = {
+            data: document.getElementById('data').value.split('-').reverse().join('/'),
+            gravidade: document.getElementById('gravidade').options[document.getElementById('gravidade').selectedIndex].text,
+            area: document.getElementById('area').value,
+            local_especifico: document.getElementById('local_especifico').value,
+            descricao: document.getElementById('descricao').value,
+            links_fotos: linksHtml,
+            cor_tema: currentThemeColor,
+            cor_fundo_email: currentInnerColor // Variável nova para o e-mail
+        };
+
+        emailjs.send('service_0lls186', 'template_qmo3tb8', templateParams)
+            .then(() => { alert("✅ Sucesso! Alerta enviado."); location.reload(); })
+            .catch(() => { alert("❌ Erro."); btn.disabled = false; });
+    });
+</script>
+</body>
+</html>
